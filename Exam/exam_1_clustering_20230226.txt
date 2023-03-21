@@ -1,0 +1,147 @@
+###
+#
+# BUAN 6357 2023 Spring (Johnston)
+#
+# Exam 1: section 1 - clustering
+#
+# A run log of this code is provided as a PDF file.
+# You may run this code, explore its actions, and add 
+#  comments as you wish.
+#
+# Based on class discussions and homework assignments,
+# You should extend this code as needed in preparation 
+#  for answering questions about the process presented 
+#  here.
+#
+###
+
+options(width=70,scipen=10)                    # avoid exponential notation
+setwd("/Users/harikrishnadev/Library/Mobile Documents/com~apple~CloudDocs/School Work/Sem 2/BUAN 6357/BUAN6357/exam_materials/exam_1") # change as needed
+ 
+byRows <- 1
+byCols <- 2
+ 
+require(tidyverse)
+require(data.table)
+ 
+t1         <- fread(file="train1.dat")   
+t2         <- fread(file="test1.dat")  
+t1Grp      <- t1$grp; t1$grp     <- NULL
+t2Grp      <- t2$grp; t2$grp     <- NULL  
+train1     <- t1
+test1      <- t2
+as.data.frame(t1)
+as.data.frame(t2)
+ 
+maxGrp     <- 10
+starts     <- 10
+seed       <- 838216542
+set.seed(seed)
+ 
+myKmeans  <- function(seed,df,k,ns) {
+             set.seed(seed)
+             return(kmeans(df,k,ns)$tot.withinss)
+             }
+ 
+(dt       <- data.table(idx=1:maxGrp, k=1:maxGrp)  )
+(kmss     <- dt[, .(wgss=myKmeans(seed,train1,k,starts)), by=.(idx)])
+ 
+dif1      <- function(df) {
+             n  <- length(df)
+             t1 <- df[1:(n-1)]-df[2:n]
+             t2 <- t1/max(t1)
+             return(list(d1=t1,d1scaled=t2))
+             }
+ 
+plot(1:maxGrp,kmss$wgss)
+ 
+(tkm      <- dif1(kmss$wgss)  )
+ 
+plot(1:(maxGrp-1),tkm$d1)
+ 
+plot(1:(maxGrp-1),tkm$d1scaled)
+ 
+set.seed(seed)
+ 
+k        <- 3
+km3      <- kmeans(train1,k,nstart=10)
+km3clust <- km3$cluster
+ 
+prepMHD <- function(df) {
+     df$cluster <- NULL
+     df$grps    <- NULL
+     n          <- nrow(df)
+     df2        <- scale(df, center=T, scale=T)
+     vcvinv     <- solve(cov(df2))
+     return( list(n      = n,
+                  avg    = attr(df2, "scaled:center"),
+                  sdev   = attr(df2, "scaled:scale"),
+                  vcvinv = vcvinv )
+            )
+     }
+ 
+t          <- train1
+t$cluster  <- km3clust
+kmMHwk     <- t                   %>%
+              group_by(cluster)   %>%
+              do(desc=prepMHD(select(.,V1,V2,V3,V4)))
+ 
+kmDesc     <- kmMHwk$desc
+kmDF       <- 4
+nCl        <- 3
+kmTr       <- matrix(NA,nrow=nrow(train1),ncol=nrow(kmMHwk))
+for ( i in 1:nrow(kmMHwk) ) {
+    tD       <- kmDesc[[i]]
+    tdf      <- scale(select(t,V1,V2,V3,V4), center=tD$avg, scale=tD$sdev)
+    kmTr[,i] <- mahalanobis(tdf, center=F, cov=tD$vcvinv, inverted=T)
+    }
+ 
+kmTr
+ 
+kmNew          <- apply(kmTr, byRows, which.min)
+train1$mhCl    <- kmNew
+train1$grp     <- t1Grp
+train1$clust   <- km3clust
+(tbl446        <-table(train1$grp,   train1$clust, dnn=c("grp"  ,"clust")) )
+(tbl452        <-table(train1$clust, train1$mhCl,  dnn=c("clust","mhCl" )) )
+ 
+kmStat         <- apply(kmTr, byRows, min)
+kmP            <- pchisq(kmStat, df=kmDF, lower.tail=F)
+ 
+kmTst          <- matrix(NA,nrow=nrow(test1),ncol=nrow(kmMHwk))
+for ( i in 1:nrow(kmMHwk) ) {
+    tD        <- kmDesc[[i]]
+    tdf       <- scale(test1, center=tD$avg, scale=tD$sdev)
+    kmTst[,i] <- mahalanobis(tdf, center=F, cov=tD$vcvinv, inverted=T)
+    }
+ 
+tstNew        <- apply(kmTst, byRows, which.min)
+test1$mhCl    <- tstNew
+test1$grp     <- t2Grp
+(tbl472       <- table(test1$grp, test1$mhCl, dnn=c("grp","mhCl")) )
+ 
+hcDat         <- train1
+hcDat$mhCl    <- NULL
+hcDat$grp     <- NULL
+hcDat$clust   <- NULL
+ 
+hc            <- hclust(dist(hcDat)^2,method="complete")
+ 
+hcwgss        <- function(train,hc,i) {
+      t1 <- cutree(hc,i)
+      t2 <- data.table(idx=t1,j=1:nrow(train))
+      t3 <- t2[, .(ss=sum(scale(train[j,], center=T, scale=F)^2)), by=.(idx)]
+      return(sum(t3))
+      }
+ 
+(hcss      <- dt[,.(wgss=hcwgss(hcDat,hc,k)),by=.(idx)] )
+ 
+plot(1:maxGrp,hcss$wgss)
+ 
+(thc       <- dif1(hcss$wgss) )
+ 
+plot(1:(maxGrp-1),thc$d1)
+ 
+plot(1:(maxGrp-1),thc$d1scaled)
+
+

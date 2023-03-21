@@ -1,0 +1,8 @@
+* using log directory ‘/home/docker/..Rcheck’
+* using R version 4.2.2 (2022-10-31)
+* using platform: aarch64-unknown-linux-gnu (64-bit)
+* using session charset: UTF-8
+* checking for file ‘./DESCRIPTION’ ... ERROR
+File DESCRIPTION does not exist
+* DONE
+Status: 1 ERROR

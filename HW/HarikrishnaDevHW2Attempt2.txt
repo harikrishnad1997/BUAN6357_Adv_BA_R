@@ -1,0 +1,154 @@
+## BUAN 6357 - Dr Johnson
+## Assignment -1 
+
+## Code requirements
+
+setwd("c:/data/BUAN6357/HW_2"); source("prep.txt", echo=T)
+
+library(data.table)
+
+demo <- F
+
+
+if(demo) {setwd("~/Library/Mobile Documents/com~apple~CloudDocs/School Work/Sem 2/BUAN 6357/BUAN6357/HW")}
+
+## Q1
+## Creating seed values
+
+seed <- 893571057
+
+## Q2
+## Importing training set
+
+train <- fread("HW_2_train.csv")
+
+if(demo) {
+  View(train)
+  str(train)
+}
+
+# Q3
+## importing testing set
+
+test <- fread("HW_2_test.csv")
+
+if(demo) {
+  View(test)
+  str(test)
+}
+
+# Q4
+## cluster scenario specific TWSS for kmeans() from training set
+
+maxClusters <- 10
+kmTWSS   <- rep(-1, maxClusters)
+for (i in 1:maxClusters) {
+  set.seed(seed)
+  kmTWSS[i] <- kmeans(train,                   # variables
+                      i,                     # number of clusters
+                      iter.max=15,           # max iterations
+                      nstart=5)$tot.withinss # warm-up and TWGSS
+}
+if(demo) {
+  plot(1:maxClusters, 
+       kmTWSS,
+       type="b",
+       main="Total Within-Group SS by Number of Clusters",
+       xlab="Number of Clusters",
+       ylab="Total With-Group SS (Kmeans)")
+  
+  d1Calc        <- function(v) {               # v: vector
+    n       <- length(v)
+    d1      <- v[1:(n-1)] - v[2:n]         # first order differences
+    d1scale <- d1/max(d1)                  # relative scale
+    return (list(d1      = d1,
+                 d1scale = d1scale) )
+  }
+  
+  (d1KM       <- d1Calc(kmTWSS) )              # d1scale has big changes at 3 and 5 
+  
+  # all cluster scenarios included
+  plot(1:length(d1KM$d1), 
+       d1KM$d1,
+       type="b",
+       main="Total Within-Group SS by Number of Clusters (1st order diff)",
+       xlab="Number of Clusters",
+       ylab="Total With-Group SS (Kmeans)")
+  
+  plot(1:length(d1KM$d1scale), 
+       d1KM$d1scale,
+       type="b",
+       main="Total Within-Group SS by Number of Clusters (1st order diff scaled)",
+       xlab="Number of Clusters",
+       ylab="Total With-Group SS (Kmeans)")
+  
+  plot(4:length(d1KM$d1scale), 
+       d1KM$d1scale[4:length(d1KM$d1scale)],
+       type="b",
+       main="Total Within-Group SS by Number of Clusters (1st order diff scaled)",
+       xlab="Number of Clusters",
+       ylab="Total With-Group SS (Kmeans)")
+}
+
+# Q6
+## merge tree for training set
+
+d         <- dist(train)
+hcObj     <- hclust(d^2)
+
+if(demo) {
+plot(hcObj) 
+}
+
+# Q5
+## cluster scenario specific TWSS for hclust() from training set
+
+hcTWSS    <- rep(-1,maxClusters)                    # pre-allocate space
+for (i in 1:maxClusters) {
+  t0        <- cutree(hcObj,i)                       # define memberships for -i- clusters
+  t1        <- data.table(c=t0,i=1:length(t0))    # transform to DT for processing
+  t2        <- t1[,
+                  .(twss=sum(scale(train[i], center=T, scale=F)^2) ),
+                  by=c]                           # WGSS vector for clusters
+  hcTWSS[i] <- sum(t2$twss)                       # TWGSS across clusters
+}
+
+if(demo) { print(hcTWSS) 
+  hcPen     <- hcTWSS
+  
+     ## Elbow plots
+
+  plot(1:length(hcTWSS), 
+       hcTWSS,
+       type="b",
+       main="Total Within-Group SS by Number of Clusters",
+       xlab="Number of Clusters",
+       ylab="Total With-Group SS (Hclust)")
+  
+  (d1HC     <- d1Calc(hcTWSS) )
+  
+  plot(1:length(d1HC$d1), 
+       d1HC$d1,
+       type="b",
+       main="Total Within-Group SS by Number of Clusters",
+       xlab="Number of Clusters",
+       ylab="Total With-Group SS (Hclust, D1)")
+  
+  plot(1:length(d1HC$d1scale), 
+       d1HC$d1scale,
+       type="b",
+       main="Total Within-Group SS by Number of Clusters",
+       xlab="Number of Clusters",
+       ylab="Total With-Group SS (Hclust, D1scale)")
+  
+  plot(4:length(d1HC$d1scale), 
+       d1HC$d1scale[4:length(d1HC$d1scale)],
+       type="b",
+       main="Total Within-Group SS by Number of Clusters",
+       xlab="Number of Clusters",
+       ylab="Total With-Group SS (Hclust, D1scale)")
+  }
+
+# Review requirement
+
+source("validate.txt", echo=T)
