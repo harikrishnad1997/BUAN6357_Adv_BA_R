@@ -1,8 +1,6 @@
-# BUAN6357_Adv_BA_R
+# BUAN 6357.sw1 : Advance Business analytics with R
 
-## BUAN 6357.sw1 : Advance Business analytics with R
-
-### Walter Johnson
+## Instructor: Walter Johnson
 
 #### Course Description
 
