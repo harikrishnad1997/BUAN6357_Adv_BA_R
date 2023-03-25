@@ -10,7 +10,7 @@
 
 
 
-<meta name="date" content="2023-03-19" />
+<meta name="date" content="2023-03-24" />
 
 <title>exam_1_classification</title>
 
@@ -350,7 +350,7 @@ display: none;
 
 
 <h1 class="title toc-ignore">exam_1_classification</h1>
-<h4 class="date">2023-03-19</h4>
+<h4 class="date">2023-03-24</h4>
 
 </div>
 
@@ -427,18 +427,18 @@ cSums        &lt;- apply(tbl, byCols, sum) # actual underlying values
 (rBR          &lt;- 1-rPC )                       # Bayes Risk by digit
 (cBR          &lt;- 1-cPC )   
 pc.correct &lt;- sum(diag(tbl))/sum(tbl)
-results_BR &lt;- list(assigned.bayes.risk=rBR,actual.bayes.risk = cBR,pc.correct = pc.correct)
+results_BR &lt;- list(assigned.bayes.risk=cBR,actual.bayes.risk = rBR,pc.correct = pc.correct)
 return(results_BR)
 }                    # Bayes Risk by actual underlying</code></pre>
 <p>Getting Bayers risk and percent correct from tbl1</p>
 <pre class="r"><code>probabilty_function(tbl1)</code></pre>
 <pre><code>## $assigned.bayes.risk
-##    1    2    3 
-## 0.00 0.04 0.02 
-## 
-## $actual.bayes.risk
 ##          1          2          3 
 ## 0.00000000 0.02040816 0.03921569 
+## 
+## $actual.bayes.risk
+##    1    2    3 
+## 0.00 0.04 0.02 
 ## 
 ## $pc.correct
 ## [1] 0.98</code></pre>
@@ -461,12 +461,12 @@ brTree    &lt;- 1-pTree
 <p>Getting Bayers risk and percent correct from tbl2</p>
 <pre class="r"><code>probabilty_function(tbl2)</code></pre>
 <pre><code>## $assigned.bayes.risk
-##    1    2    3 
-## 0.00 0.02 0.10 
-## 
-## $actual.bayes.risk
 ##          1          2          3 
 ## 0.00000000 0.09259259 0.02173913 
+## 
+## $actual.bayes.risk
+##    1    2    3 
+## 0.00 0.02 0.10 
 ## 
 ## $pc.correct
 ## [1] 0.96</code></pre>

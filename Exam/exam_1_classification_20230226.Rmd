@@ -90,7 +90,7 @@ cSums        <- apply(tbl, byCols, sum) # actual underlying values
 (rBR          <- 1-rPC )                       # Bayes Risk by digit
 (cBR          <- 1-cPC )   
 pc.correct <- sum(diag(tbl))/sum(tbl)
-results_BR <- list(assigned.bayes.risk=rBR,actual.bayes.risk = cBR,pc.correct = pc.correct)
+results_BR <- list(assigned.bayes.risk=cBR,actual.bayes.risk = rBR,pc.correct = pc.correct)
 return(results_BR)
 }                    # Bayes Risk by actual underlying
 ```
