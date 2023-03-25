@@ -28,7 +28,7 @@ byCols     <- 2
 byRows     <- 1
 demo <- T
 
-if(demo) {setwd("/Users/harikrishnadev/Library/Mobile Documents/com~apple~CloudDocs/School Work/Sem 2/BUAN 6357/BUAN6357/exam_materials/exam_1")}
+if(demo) {setwd("/Users/harikrishnadev/Library/Mobile Documents/com~apple~CloudDocs/School Work/Sem 2/BUAN 6357/BUAN6357/BUAN6357_Adv_BA_R/Exam")}
 
 ```
 
@@ -117,9 +117,18 @@ Adding Silhouette analysis
 
 ```{r}
 
-fviz_nbclust(train1, kmeans, method='silhouette')
+fviz_nbclust(train1, kmeans, method="silhouette")
 
 ```
+
+Adding gap statistics analysis
+
+```{r}
+
+fviz_nbclust(train1, kmeans, method="gap_stat")
+
+```
+
 
 
 HClust clustering
