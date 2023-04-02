@@ -1,7 +1,7 @@
 setwd("c:/data/BUAN6357/HW_4"); source("prep.txt", echo=T)
 
 rm(list=ls())
-demo <- T
+demo <- F
 require(MASS)
 data("airquality")
 
