@@ -15,7 +15,7 @@ raw$Month <- as.factor(raw$Month)
 
 seed    <- 504737137
 
-(n      <- nrow(raw) )
+(n      <- nrow(raw))
 
 fmla <- Ozone ~ .
 
