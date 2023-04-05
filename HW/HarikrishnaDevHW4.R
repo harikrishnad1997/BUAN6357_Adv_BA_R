@@ -47,6 +47,7 @@ dt2     <- c2[,fitPred(raw[-tst,],raw[tst,],tst),by=.(grp)]
 jk.resid      <- data.table(loc=dt2$idx,diff=dt2$resid)
 if(demo){summary(jk.resid)}
 
+
 set.seed(seed)
 kf  <- 10
 t       <- rep(1:kf,ceiling(n/kf))[1:n]
@@ -55,4 +56,24 @@ dt3     <- c3[,fitPred(raw[-idx,],raw[idx,],idx),by=.(k)]
 kf.resid <- data.table(k=dt3$k,loc=dt3$idx,diff=dt3$resid)
 if(demo){summary(kf.resid)}
 
+ci <- function(res,a) {
+alpha <- a 
+# Parametric             
+(z     <- qnorm(1-(alpha/2)) ) 
+(t     <- mean(res) )             
+(s     <- sd(res)   )            
+(lbP   <- t-z*s   )           
+(ubP   <- t+z*s   ) 
+# Non parametric
+(lo    <- alpha/2)  # lower bound definition
+(hi    <- 1-lo)     # upper bound definition
+(ci    <- quantile(res, c(lo,hi)) )
+results <- list(par_ci=data.table("lb"=lbP,"ub"=ubP),non_par_ci=ci)
+return(results)
+}
+
+ci(base.resid,0.05)
+ci(cv.resid$diff,0.05)
+ci(jk.resid$diff,0.05)
+ci(kf.resid$diff,0.05)
 source("validate.txt", echo=T)
