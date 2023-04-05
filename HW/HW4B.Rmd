@@ -1,27 +1,52 @@
-setwd("c:/data/BUAN6357/HW_4"); source("prep.txt", echo=T)
+---
+title: "BUAN6357-HW4B"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+  word_document: default
+date: "2023-02-20"
+editor_options: 
+  markdown: 
+    wrap: 72
+---
 
+Adding libraries and datasets
+
+```{r}
 rm(list=ls())
 demo <- T
-require(MASS)
 data("airquality")
-
 require(data.table)
 require(tidyverse)
+```
 
-# convert to data.table
+Declaring seed and cleaning the working dataset 
 
+```{r}
+seed    <- 504737137
 raw     <- setDT(na.omit(airquality))[,-c("Day")]
 raw$Month <- as.factor(raw$Month)
-
-seed    <- 504737137
-
 (n      <- nrow(raw))
+```
 
+Linear model relation
+
+```{r}
 fmla <- Ozone ~ .
+```
 
+Baseline model
+
+```{r}
 base.resid <- lm(fmla,data=raw)$residuals
 
 if(demo){summary(lm(fmla,data=raw))}
+```
+
+Simple cross validation model
+
+```{r}
 
 set.seed(seed)
 frac <- 0.1
@@ -34,6 +59,14 @@ cv.tst <- predict(m1,raw[tst,])
 if(demo){summary(cv.tst)}
 cv.resid <- data.table(loc=tst,diff=raw$Ozone[tst]-cv.tst)
 if(demo){summary(cv.resid)}
+
+```
+
+
+Function to run linear model on training and testing data sets
+
+```{r}
+
 fitPred <- function(trn,tst,i) {
   m <- lm(fmla,data=trn)  
   y <- tst$Ozone    
@@ -42,11 +75,24 @@ fitPred <- function(trn,tst,i) {
   return(data.table(idx=i,resid=r,y=y,yhat=p))
 }
 
+```
+
+Jackknife model LOOCV
+
+```{r}
+
 c2      <- data.table(grp=1:n, tst=1:n)
 dt2     <- c2[,fitPred(raw[-tst,],raw[tst,],tst),by=.(grp)]
 jk.resid      <- data.table(loc=dt2$idx,diff=dt2$resid)
 if(demo){summary(jk.resid)}
 
+```
+
+
+K fold model
+
+
+```{r}
 
 set.seed(seed)
 kf  <- 10
@@ -55,6 +101,12 @@ c3      <- data.table(k=t ,idx=sample(n))
 dt3     <- c3[,fitPred(raw[-idx,],raw[idx,],idx),by=.(k)]
 kf.resid <- data.table(k=dt3$k,loc=dt3$idx,diff=dt3$resid)
 if(demo){summary(kf.resid)}
+
+```
+
+Function to calculate parameterised and no parametrised confidence intervals
+
+```{r}
 
 ci <- function(res,a) {
   alpha <- a 
@@ -72,8 +124,15 @@ ci <- function(res,a) {
 return(results)
 }
 
+```
+
+Confidence intervals of the different models
+
+```{r}
+
 ci(base.resid,0.05)
 ci(cv.resid$diff,0.05)
 ci(jk.resid$diff,0.05)
 ci(kf.resid$diff,0.05)
-source("validate.txt", echo=T)
+
+```
