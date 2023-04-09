@@ -1,0 +1,39 @@
+setwd("c:/data/BUAN6357/HW_5"); source("prep.txt", echo=T)
+
+rm(list=ls())
+demo <- T
+require(MASS)
+data("airquality")
+
+require(data.table)
+require(tidyverse)
+require(broom)
+
+# convert to data.table
+
+raw     <- setDT(na.omit(airquality))[,-c("Day")]
+raw$Month <- as.factor(raw$Month)
+
+seed    <- 337337168
+
+n      <- nrow(raw) 
+b <- 500 
+
+fmla <- Ozone ~ .
+
+set.seed(seed)
+t2 <- sample(n, size=b*n, replace=T) 
+c2 <- data.table(g=rep(1:b,each=n),idx=t2)
+cl.dt <- c2[,tidy(lm(fmla,data=raw[idx,]),conf.int=T), by=g]
+if(demo) {summary(cl.dt)
+View(cl.dt)}
+
+
+set.seed(seed)
+t3 <- sample(rep(1:n,b))
+c3 <- data.table(g=rep(1:b,each=n),idx=t3)
+bal.dt <- c3[,tidy(lm(fmla,data=raw[idx,]),conf.int=T),by=g] 
+if(demo) {summary(bal.dt)
+View(bal.dt)}
+
+source("validate.txt", echo=T)
