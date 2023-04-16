@@ -41,19 +41,22 @@ ciPNP    <- function(v,ci) {  # data vector, 0 < CI < 1
          z     <- qnorm(1-alpha/2)     # Z for start of upper tail
          t     <- mean(v)              # for Paramteric
          s     <- sd(v)                # for Parametric
+         e     <- mean(scale(v,center = T)) # Adding mse
          lP    <- t-z*s                # lower bound for Parametric CI
          uP    <- t+z*s                # upper bound for Parametric CI
          bNP   <- c(alpha/2,1-alpha/2) # bounds for Non-Parametric CI
          ci    <- quantile(v, bNP)     # actual Non-Parametric CI bounds values
-         return(data.table(avg=t,stDev=s,loP=lP,     hiP=uP,
+         return(data.table(avg=t,stDev=s,mse=e,loP=lP,     hiP=uP,
                                          loNP=ci[1], hiNP=ci[2]) )
          }
 
 
 coverage <- 0.95
 ci2      <- cl.dt[,ciPNP(estimate,coverage),by=term]
+ci2
 
 ci3      <- bal.dt[,ciPNP(estimate,coverage),by=term]
+ci3
 
 m0 <- lm(fmla,data=raw)  
 p0 <- m0$fitted.values  
