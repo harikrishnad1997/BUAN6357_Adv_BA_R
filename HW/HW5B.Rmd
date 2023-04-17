@@ -1,5 +1,10 @@
-setwd("c:/data/BUAN6357/HW_5"); source("prep.txt", echo=T)
+---
+title: "HW-5B"
+output: html_document
+date: "`r Sys.Date()`"
+---
 
+```{r}
 rm(list=ls())
 demo <- T
 require(MASS)
@@ -9,33 +14,54 @@ require(data.table)
 require(tidyverse)
 require(broom)
 
-# convert to data.table
+```
+
+Adding airquality data into raw file and formatting the same
+
+```{r}
 
 raw     <- setDT(na.omit(airquality))[,-c("Day")]
 raw$Month <- as.factor(raw$Month)
+```
 
+Establishing seed and number of iterations
+
+```{r}
 seed    <- 337337168
 
 n      <- nrow(raw) 
 b <- 500 
+```
 
+Setting lm function relation
+```{r}
 fmla <- Ozone ~ .
+```
 
+Classic bootstrapping 
+
+```{r}
 set.seed(seed)
 t2 <- sample(n, size=b*n, replace=T) 
 c2 <- data.table(g=rep(1:b,each=n),idx=t2)
 cl.dt <- c2[,tidy(lm(fmla,data=raw[idx,]),conf.int=T), by=g]
 if(demo) {summary(cl.dt)
-View(cl.dt)}
+print(cl.dt)}
+```
 
+Balanced bootstrapping
 
+```{r}
 set.seed(seed)
 t3 <- sample(rep(1:n,b))
 c3 <- data.table(g=rep(1:b,each=n),idx=t3)
 bal.dt <- c3[,tidy(lm(fmla,data=raw[idx,]),conf.int=T),by=g] 
 if(demo) {summary(bal.dt)
-View(bal.dt)}
+print(bal.dt)}
+```
 
+Function to obtain CIs and MSE
+```{r}
 ciPNP    <- function(v,ci) {  # data vector, 0 < CI < 1
          alpha <- 1-ci                 # area in the tails
          z     <- qnorm(1-alpha/2)     # Z for start of upper tail
@@ -49,22 +75,35 @@ ciPNP    <- function(v,ci) {  # data vector, 0 < CI < 1
          return(data.table(avg=t,stDev=s,mse=e,loP=lP,     hiP=uP,
                                          loNP=round(ci[1],3), hiNP=round(ci[2],3)) )
          }
+```
 
+Classic bootstrap parameters
 
+```{r}
 coverage <- 0.95
 ci2      <- cl.dt[,ciPNP(estimate,coverage),by=term]
-View(ci2)
+print(ci2)
+```
 
+Balanced bootstrap
+```{r}
 ci3      <- bal.dt[,ciPNP(estimate,coverage),by=term]
-View(ci3)
+print(ci3)
+```
 
+Baseline model
 
-
+```{r}
 m0 <- lm(fmla,data=raw)  
 p0 <- m0$fitted.values  
 r0 <- m0$residuals      
 bs.dt <- as.data.table(tidy(m0,conf.int=T)) 
 summary(m0)
+```
+
+Creating a function to get histogram plots of the distributions of the estimates
+
+```{r}
 
 plot_histogram <- function(df) {
   # loop through each row and create a histogram
@@ -77,9 +116,23 @@ plot_histogram <- function(df) {
       ylab = "Frequency",
       xlim = c(df$loNP[i], df$hiP[i])
     )
+    abline(v = df$hiP[i], col = "green")
+    abline(v = df$loP[i], col = "green")
+    abline(v = df$hiNP[i], col = "red")
+    abline(v = df$loNP[i], col = "red")
+    print(df[i])
   }
 }
 
-plot_histogram(ci2)
+```
 
-source("validate.txt", echo=T)
+
+Classic bootstrap
+```{r}
+plot_histogram(ci2)
+```
+
+Balanced bootstrap
+```{r}
+plot_histogram(ci3)
+```
