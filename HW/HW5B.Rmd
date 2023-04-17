@@ -67,7 +67,7 @@ ciPNP    <- function(v,ci) {  # data vector, 0 < CI < 1
          z     <- qnorm(1-alpha/2)     # Z for start of upper tail
          t     <- mean(v)              # for Paramteric
          s     <- sd(v)                # for Parametric
-         e     <- mean(v-t) # Adding mse
+         e     <- mean((v-t)^2) # Adding mse
          lP    <- round(t-z*s,digits = 3)              # lower bound for Parametric CI
          uP    <- round(t+z*s ,3)               # upper bound for Parametric CI
          bNP   <- c(alpha/2,1-alpha/2) # bounds for Non-Parametric CI
