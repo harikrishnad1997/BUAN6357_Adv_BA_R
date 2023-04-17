@@ -136,3 +136,13 @@ Balanced bootstrap
 ```{r}
 plot_histogram(ci3)
 ```
+
+Merged table
+
+```{r}
+
+merged <- subset(merge(ci2,ci3,by='term',suffixes = c("cl", "ba")),select = c("term","loPcl","hiPcl","loNPcl","hiNPcl","loPba","hiPba","loNPba","hiNPba"))
+merged <- merge(merged,subset(bs.dt,select=c("term","conf.low","conf.high")),by="term")
+merged
+
+```
