@@ -68,11 +68,12 @@ ciPNP    <- function(v,ci) {  # data vector, 0 < CI < 1
          t     <- mean(v)              # for Paramteric
          s     <- sd(v)                # for Parametric
          e     <- mean((v-t)^2) # Adding mse
+         
          lP    <- round(t-z*s,digits = 3)              # lower bound for Parametric CI
          uP    <- round(t+z*s ,3)               # upper bound for Parametric CI
          bNP   <- c(alpha/2,1-alpha/2) # bounds for Non-Parametric CI
          ci    <- quantile(v, bNP)     # actual Non-Parametric CI bounds values
-         return(data.table(avg=t,stDev=s,mse=e,loP=lP,     hiP=uP,
+         return(data.table(avg=t,stDev=s,mse=round(e,3),loP=lP,     hiP=uP,
                                          loNP=round(ci[1],3), hiNP=round(ci[2],3)) )
          }
 ```
@@ -82,13 +83,18 @@ Classic bootstrap parameters
 ```{r}
 coverage <- 0.95
 ci2      <- cl.dt[,ciPNP(estimate,coverage),by=term]
+#mse2 <- cl.dt[,round(scale(estimate,center = T)^2,3),by = term]
+#mse2 <- cl.dt[,round(mean(scale(estimate,center = T)^2),3),by = term]
 print(ci2)
+#print(mse2)
 ```
 
 Balanced bootstrap
 ```{r}
 ci3      <- bal.dt[,ciPNP(estimate,coverage),by=term]
+#mse3 <- bal.dt[,round(mean(scale(estimate,center = T)^2),3),by = term]
 print(ci3)
+#print(mse3)
 ```
 
 Baseline model
