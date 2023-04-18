@@ -82,4 +82,8 @@ plot_histogram <- function(df) {
 
 plot_histogram(ci2)
 
+merged <- subset(merge(ci2,ci3,by='term',suffixes = c("cl", "ba")),select = c("term","loPcl","hiPcl","loNPcl","hiNPcl","loPba","hiPba","loNPba","hiNPba"))
+merged <- merge(merged,subset(bs.dt,select=c("term","conf.low","conf.high")),by="term")
+merged
+
 source("validate.txt", echo=T)
