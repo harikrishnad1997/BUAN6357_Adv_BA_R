@@ -135,12 +135,12 @@ plot_histogram <- function(df) {
 
 Classic bootstrap
 ```{r}
-plot_histogram(ci2)
+#plot_histogram(ci2)
 ```
 
 Balanced bootstrap
 ```{r}
-plot_histogram(ci3)
+#plot_histogram(ci3)
 ```
 
 Merged table
