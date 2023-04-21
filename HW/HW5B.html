@@ -10,7 +10,7 @@
 
 
 
-<meta name="date" content="2023-04-18" />
+<meta name="date" content="2023-04-19" />
 
 <title>HW-5B</title>
 
@@ -350,7 +350,7 @@ display: none;
 
 
 <h1 class="title toc-ignore">HW-5B</h1>
-<h4 class="date">2023-04-18</h4>
+<h4 class="date">2023-04-19</h4>
 
 </div>
 
@@ -472,12 +472,12 @@ print(bal.dt)}</code></pre>
          t     &lt;- mean(v)              # for Paramteric
          s     &lt;- sd(v)                # for Parametric
          e     &lt;- mean((v-t)^2) # Adding mse
-         
+         e2    &lt;- mean(scale(v,center = T,scale = F)^2)
          lP    &lt;- round(t-z*s,digits = 3)              # lower bound for Parametric CI
          uP    &lt;- round(t+z*s ,3)               # upper bound for Parametric CI
          bNP   &lt;- c(alpha/2,1-alpha/2) # bounds for Non-Parametric CI
          ci    &lt;- quantile(v, bNP)     # actual Non-Parametric CI bounds values
-         return(data.table(avg=t,stDev=s,mse=round(e,3),loP=lP,     hiP=uP,
+         return(data.table(avg=t,stDev=s,mse=round(e,3),loP=lP,e2=e2,     hiP=uP,
                                          loNP=round(ci[1],3), hiNP=round(ci[2],3)) )
          }</code></pre>
 <p>Classic bootstrap parameters</p>
@@ -486,38 +486,48 @@ ci2      &lt;- cl.dt[,ciPNP(estimate,coverage),by=term]
 #mse2 &lt;- cl.dt[,round(scale(estimate,center = T)^2,3),by = term]
 #mse2 &lt;- cl.dt[,round(mean(scale(estimate,center = T)^2),3),by = term]
 print(ci2)</code></pre>
-<pre><code>##           term          avg       stDev     mse      loP     hiP     loNP
-## 1: (Intercept) -74.04592672 28.63137258 818.116 -130.162 -17.929 -124.997
-## 2:     Solar.R   0.05050078  0.02283162   0.001    0.006   0.095    0.011
-## 3:        Wind  -3.13811526  0.89433873   0.798   -4.891  -1.385   -5.068
-## 4:        Temp   1.88355071  0.35127145   0.123    1.195   2.572    1.154
-## 5:      Month6 -15.18438645  9.49164018  89.911  -33.788   3.419  -34.492
-## 6:      Month7  -8.96256288  8.07165455  65.021  -24.783   6.858  -23.403
-## 7:      Month8  -4.62994781  9.84866652  96.802  -23.933  14.673  -22.843
-## 8:      Month9 -16.67769125  6.02529957  36.232  -28.487  -4.868  -28.468
-##       hiNP
-## 1: -10.352
-## 2:   0.098
-## 3:  -1.583
-## 4:   2.549
-## 5:   3.249
-## 6:   7.207
-## 7:  16.723
-## 8:  -4.476</code></pre>
-<pre class="r"><code>#print(mse2)</code></pre>
+<pre><code>##           term          avg       stDev     mse      loP           e2     hiP
+## 1: (Intercept) -74.04592672 28.63137258 818.116 -130.162 8.181160e+02 -17.929
+## 2:     Solar.R   0.05050078  0.02283162   0.001    0.006 5.202404e-04   0.095
+## 3:        Wind  -3.13811526  0.89433873   0.798   -4.891 7.982421e-01  -1.385
+## 4:        Temp   1.88355071  0.35127145   0.123    1.195 1.231448e-01   2.572
+## 5:      Month6 -15.18438645  9.49164018  89.911  -33.788 8.991105e+01   3.419
+## 6:      Month7  -8.96256288  8.07165455  65.021  -24.783 6.502130e+01   6.858
+## 7:      Month8  -4.62994781  9.84866652  96.802  -23.933 9.680224e+01  14.673
+## 8:      Month9 -16.67769125  6.02529957  36.232  -28.487 3.623163e+01  -4.868
+##        loNP    hiNP
+## 1: -124.997 -10.352
+## 2:    0.011   0.098
+## 3:   -5.068  -1.583
+## 4:    1.154   2.549
+## 5:  -34.492   3.249
+## 6:  -23.403   7.207
+## 7:  -22.843  16.723
+## 8:  -28.468  -4.476</code></pre>
+<pre class="r"><code>#scale(cl.dt$estimate,center = T,scale = F)
+#print(mse2)</code></pre>
 <p>Balanced bootstrap</p>
 <pre class="r"><code>ci3      &lt;- bal.dt[,ciPNP(estimate,coverage),by=term]
 #mse3 &lt;- bal.dt[,round(mean(scale(estimate,center = T)^2),3),by = term]
 print(ci3)</code></pre>
-<pre><code>##           term         avg      stDev     mse      loP     hiP     loNP    hiNP
-## 1: (Intercept) -74.9576862 28.6244136 817.718 -131.061 -18.855 -126.985 -17.869
-## 2:     Solar.R   0.0509622  0.0215423   0.000    0.009   0.093    0.010   0.093
-## 3:        Wind  -3.1295547  0.8923434   0.795   -4.879  -1.381   -4.931  -1.436
-## 4:        Temp   1.8914361  0.3598695   0.129    1.186   2.597    1.189   2.584
-## 5:      Month6 -15.1948666  9.7399388  94.677  -34.285   3.895  -32.795   5.186
-## 6:      Month7  -8.9240919  8.1571267  66.406  -24.912   7.064  -26.253   6.210
-## 7:      Month8  -4.5219872 10.4368868 108.711  -24.978  15.934  -23.807  15.449
-## 8:      Month9 -16.2722769  6.3451768  40.181  -28.709  -3.836  -28.920  -4.856</code></pre>
+<pre><code>##           term         avg      stDev     mse      loP           e2     hiP
+## 1: (Intercept) -74.9576862 28.6244136 817.718 -131.061 8.177183e+02 -18.855
+## 2:     Solar.R   0.0509622  0.0215423   0.000    0.009 4.631427e-04   0.093
+## 3:        Wind  -3.1295547  0.8923434   0.795   -4.879 7.946841e-01  -1.381
+## 4:        Temp   1.8914361  0.3598695   0.129    1.186 1.292471e-01   2.597
+## 5:      Month6 -15.1948666  9.7399388  94.677  -34.285 9.467668e+01   3.895
+## 6:      Month7  -8.9240919  8.1571267  66.406  -24.912 6.640564e+01   7.064
+## 7:      Month8  -4.5219872 10.4368868 108.711  -24.978 1.087107e+02  15.934
+## 8:      Month9 -16.2722769  6.3451768  40.181  -28.709 4.018075e+01  -3.836
+##        loNP    hiNP
+## 1: -126.985 -17.869
+## 2:    0.010   0.093
+## 3:   -4.931  -1.436
+## 4:    1.189   2.584
+## 5:  -32.795   5.186
+## 6:  -26.253   6.210
+## 7:  -23.807  15.449
+## 8:  -28.920  -4.856</code></pre>
 <pre class="r"><code>#print(mse3)</code></pre>
 <p>Baseline model</p>
 <pre class="r"><code>m0 &lt;- lm(fmla,data=raw)  
