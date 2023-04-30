@@ -10,7 +10,7 @@
 
 
 
-<meta name="date" content="2023-04-23" />
+<meta name="date" content="2023-04-29" />
 
 <title>exam_2_cv</title>
 
@@ -350,7 +350,7 @@ display: none;
 
 
 <h1 class="title toc-ignore">exam_2_cv</h1>
-<h4 class="date">2023-04-23</h4>
+<h4 class="date">2023-04-29</h4>
 
 </div>
 
@@ -367,12 +367,13 @@ n   &lt;- nrow(raw)
 mdl &lt;- V13~.</code></pre>
 <p>Baseline model</p>
 <pre class="r"><code>r0  &lt;- lm(mdl,data=raw)</code></pre>
-<p>Cross validation function</p>
+<p>Simple Cross validation function</p>
 <pre class="r"><code>uF1 &lt;- function(df,i) {
   m  &lt;- lm(mdl,data=df[-i,])
   t  &lt;- df$V13[i]-predict(m,df[i,])
   return(list(loc=i, diff=t) )
 }</code></pre>
+<p>Jackknife model LOOCV</p>
 <pre class="r"><code>uF2 &lt;- function(df, grps, tst) {
   m  &lt;- lm(mdl,data=df[-tst,])
   t  &lt;- df$V13[tst]-predict(m,df[tst,])

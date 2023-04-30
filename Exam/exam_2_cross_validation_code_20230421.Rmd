@@ -31,7 +31,7 @@ Baseline model
 r0  <- lm(mdl,data=raw)
 ```
 
-Cross validation function
+Simple Cross validation function
 
 ```{r}
 uF1 <- function(df,i) {
@@ -41,6 +41,8 @@ uF1 <- function(df,i) {
 }
 ```
 
+Jackknife model LOOCV
+
 ```{r}
 uF2 <- function(df, grps, tst) {
   m  <- lm(mdl,data=df[-tst,])
@@ -48,6 +50,8 @@ uF2 <- function(df, grps, tst) {
   return(list(k=grps, loc=tst, diff=t) )
 }
 ```
+
+
 
 ```{r}
 t   <- data.table(grp=1:n, i=1:n)
