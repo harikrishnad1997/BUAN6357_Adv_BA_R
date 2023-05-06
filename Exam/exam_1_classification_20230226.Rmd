@@ -39,10 +39,7 @@ Reading training data
 ```{r}
 
 in1        <- fread(file="classif.dat")
-in1_1 <- in1
-in1_1$grp <- factor(in1$grp,levels = 1:3)
 if(demo) {str(in1)}
-if(demo) {str(in1_1)}
 
 ```
 
@@ -102,29 +99,6 @@ brLogit   <- 1-pLogit
 probabilty_function(tbl1)
 
 ```
-Adding levels to the grps to make it ordinal in nature
-
-```{r}
-
-t         <- data.table(idx=1:3, i=1:3) 
-tLogit     <- t[,.(fitted=fitLogit(in1_1,i)), by=.(idx)]
-mLogit    <- matrix(tLogit$fitted, ncol=length(classif),byrow=F) 
-idxLogit  <- apply(mLogit,byRows,which.max) 
-classLogit<- classif[idxLogit] 
-rMargin   <- mLogit[,1]+mLogit[,2]+mLogit[,3] 
-t1         <- apply(mLogit,byRows,max)
-pLogit    <- t1/rMargin 
-brLogit   <- 1-pLogit 
-(tbl1_1      <- table(in1_1$grp,classLogit,dnn=c("grp","class")) )
-
-```
-Getting Bayers risk and percent correct from tbl1
-
-```{r}
-
-probabilty_function(tbl1_1)
-
-```
 
 Same exercise for Tree classification
 
@@ -149,26 +123,4 @@ probabilty_function(tbl2)
 
 ```
 
-```{r}
-
-nmDat      <- in1_1
-nmDat$fac  <- as.factor(nmDat$grp)
-mn        <- ctree(fac~.-grp,data=nmDat) 
-mnTree     <- as.matrix(predict(mn,type="prob")) 
-attr(mnTree,"dimnames") <- NULL
-idxTr      <- apply(mnTree,byRows,which.max)
-classTree <- classif[idxTr] 
-pTree     <- apply(mnTree,byRows,max) 
-brTree    <- 1-pTree 
-(tbl2_1      <- table(in1_1$grp,classTree,dnn=c("grp","class")) )
-
-```
-
-Getting Bayers risk and percent correct from tbl2
-
-```{r}
-
-probabilty_function(tbl2_1)
-
-```
 
